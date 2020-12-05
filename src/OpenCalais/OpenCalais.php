@@ -38,12 +38,27 @@ class OpenCalais {
     }
 
     /**
+     * Case insensitive variant of array_unique
+     * http://php.net/manual/de/function.array-unique.php#78801
+     * @param array $array
+     * @return array
+     */
+    private function array_iunique($array) {
+        $lowered = array_map('strtolower', $array); 
+        return array_intersect_key($array, array_unique($lowered)); 
+    }
+
+    /**
      * Return entities by document
      * @param string $document
+     * @param float $relevance From 0 to 1. Return only elements with greater 
+     *                         than or equal relevance value. Default is 0.
+     * @param bool $flatten    Return flattened or nested array.
+     *                         Default is false (nested).
      * @return array
      * @throws OpenCalaisException
      */
-    public function getEntities($document) {
+    public function getEntities($document, $relevance = 0, $flatten = false) {
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->api_url);
@@ -72,14 +87,28 @@ class OpenCalais {
         }
 
         foreach ($object as $item) {
-            if (!empty($item->_typeGroup) && !empty($item->name)) {
-                if(!empty($item->_type)){
-                    $this->entities[$item->_typeGroup][$item->_type][] = trim($item->name);
+            if (!empty($item->_typeGroup) && !empty($item->name) 
+                && ((isset($item->importance) && $item->importance >= $relevance) 
+                || $item->relevance >= $relevance)) {
+
+                // if flatten is true, use only one array, no subarrays
+                if ($flatten) {
+                    $this->entities[] = trim($item->name);
+                } else {
+                    if(!empty($item->_type)){
+                        $this->entities[$item->_typeGroup][$item->_type][] = trim($item->name);
+                    }
+                    else{
+                        $this->entities[$item->_typeGroup][] = trim($item->name);
+                    }
                 }
-                else{
-                    $this->entities[$item->_typeGroup][] = trim($item->name);
-                }
+
             }
+        }
+
+        // remove duplicate tags
+        if ($flatten) {
+            $this->entities = array_values($this->array_iunique($this->entities));
         }
 
         return $this->entities;

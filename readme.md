@@ -23,6 +23,10 @@ Basic usage is simple. Create an instance of the class with your API key, and ca
     $oc = new \OpenCalais\OpenCalais('your-api-key');
     $entities = $oc->getEntities($content);
 
+getEntities method accepts two additional arguments: 
+* float $relevance - From 0 to 1. Return only elements with greater than or equal relevance value. Default is 0.
+* bool $flatten - Return flattened or nested array. Default is false (nested).
+
 ### Example input ###
 
 > April 7 (Bloomberg) . Yahoo! Inc., the Internet company that snubbed a $44.6 billion takeover bid from Microsoft Corp., may drop in Nasdaq trading after the software maker threatened to cut its bid if directors fail to give in soon.
