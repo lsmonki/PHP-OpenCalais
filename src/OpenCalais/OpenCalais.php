@@ -22,7 +22,7 @@ class OpenCalais {
     public $outputFormat = 'application/json';
     public $contentType = 'text/html';
 
-    private $api_url = 'https://api.thomsonreuters.com/permid/calais';
+    private $api_url = 'https://api-eit.refinitiv.com/permid/calais';
     private $api_token = '';
     private $entities = array();
 
